@@ -1,0 +1,76 @@
+#include <iostream>
+#include <cstdio>
+#include <queue>
+#include <cstring>
+#include <cmath>
+#define SIZE 220
+#define INF 1e8
+using namespace std;
+
+int maps[SIZE][SIZE];
+int flow[SIZE];
+int pre[SIZE];
+int n,m;
+queue<int> q;
+
+int bfs(int src,int des)
+{
+    while(!q.empty()) q.pop();
+    for(int i=1;i<=m;++i)
+        pre[i]=-1;
+    pre[src]=0;
+    flow[src]=INF;
+    q.push(src);
+    while(!q.empty())
+    {
+        int x=q.front();
+        q.pop();
+        if(x==des) break;
+        for(int i=1;i<=m;++i)
+        {
+            while(i!=x&&pre[i]==-1&&maps[x][i]>0)
+            {
+                pre[i]=x;
+                flow[i]=min(maps[x][i],flow[x]);
+                q.push(i);
+            }
+        }
+    }
+    if(pre[des]==-1) return -1;
+    else return flow[des];
+}
+
+int maxflow(int src,int des)
+{
+    int sum=0;
+    int inc=0;
+    while((inc=bfs(src,des))!=-1)
+    {
+        int x=des;
+        while(x!=src)
+        {
+            maps[pre[x]][x]-=inc;
+            maps[x][pre[x]]+=inc;
+            x=pre[x];
+        }
+        sum+=inc;
+    }
+    return sum;
+}
+int main()
+{
+    int s,e,v;
+    while(scanf("%d%d",&n,&m)!=EOF)
+    {
+        memset(maps,0,sizeof(maps));
+        memset(flow,0,sizeof(flow));
+        for(int i=1;i<=n;++i){
+            scanf("%d%d%d",&s,&e,&v);
+            if(s==e) continue;
+            maps[s][e]+=v;
+        }
+        int res=maxflow(1,m);
+        printf("%d\n",res);
+    }
+    return 0;
+}
